@@ -1,0 +1,78 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ApplicationBuilder, CallbackQueryHandler, CommandHandler, ContextTypes
+import asyncio
+
+# TOKEN del bot
+TOKEN = '7584566617:AAGnPIj_B49dFMAD4jNFQae30o479PGYADI'
+
+# ID del grupo de Telegram
+CHAT_ID = -1002744372098
+
+# Botones de emergencia
+emergencias = [
+    ("🚗 Accidente vehicular", "accidente"),
+    ("🏠 Incendio estructural", "estructural"),
+    ("🌲 Incendio forestal", "forestal"),
+    ("💨 Fuga de gas", "gas"),
+    ("🧭 Búsqueda de personas", "busqueda"),
+    ("🐾 Rescate animal", "animal"),
+    ("❗ Otra emergencia", "otra")
+]
+
+# Crear botones
+def crear_botones():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(text, callback_data=code)] for text, code in emergencias
+    ])
+
+# Comando /start: muestra los botones
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(
+        chat_id=CHAT_ID,
+        text="🚨 *Seleccioná el tipo de emergencia:*",
+        reply_markup=crear_botones(),
+        parse_mode='Markdown'
+    )
+
+# Al presionar un botón
+async def boton_presionado(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    tipo = query.data
+    usuario = query.from_user.first_name
+
+    mensajes = {
+        "accidente": "🚗 *¡ALERTA! Accidente vehicular!*",
+        "estructural": "🏠 *¡ALERTA! Incendio estructural!*",
+        "forestal": "🌲 *¡ALERTA! Incendio forestal!*",
+        "gas": "💨 *¡ALERTA! Fuga de gas!*",
+        "busqueda": "🧭 *¡ALERTA! Búsqueda de personas!*",
+        "animal": "🐾 *¡ALERTA! Rescate animal!*",
+        "otra": "❗ *¡ALERTA! Otra emergencia!*"
+    }
+
+    texto_alerta = f"{mensajes.get(tipo, '🚨 *Emergencia desconocida*')}\n👤 Reportado por: *{usuario}*"
+
+    await context.bot.send_message(
+        chat_id=CHAT_ID,
+        text=texto_alerta,
+        parse_mode='Markdown'
+    )
+
+    await asyncio.sleep(1)
+
+    await context.bot.send_message(
+        chat_id=CHAT_ID,
+        text="🔁 *¿Otra emergencia? Seleccioná nuevamente:*",
+        reply_markup=crear_botones(),
+        parse_mode='Markdown'
+    )
+
+# Iniciar bot
+if __name__ == '__main__':
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler('start', start))
+    app.add_handler(CallbackQueryHandler(boton_presionado))
+    app.run_polling()
+~ $
