@@ -1,12 +1,11 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CallbackQueryHandler, CommandHandler, ContextTypes
 import asyncio
+import os
 
-# TOKEN del bot
-TOKEN = '7584566617:AAGnPIj_B49dFMAD4jNFQae30o479PGYADI'
-
-# ID del grupo de Telegram
-CHAT_ID = -1002744372098
+# Leer TOKEN y CHAT_ID desde las variables de entorno de Railway
+TOKEN = os.environ['TOKEN']
+CHAT_ID = int(os.environ['CHAT_ID'])
 
 # Botones de emergencia
 emergencias = [
@@ -75,4 +74,3 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('start', start))
     app.add_handler(CallbackQueryHandler(boton_presionado))
     app.run_polling()
-~ $
